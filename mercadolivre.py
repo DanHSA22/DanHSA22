@@ -7,6 +7,30 @@ import config
 logger = logging.getLogger(__name__)
 
 SEARCH_URL = f"{config.ML_API_BASE}/sites/{config.ML_SITE_ID}/search"
+TOKEN_URL = f"{config.ML_API_BASE}/oauth/token"
+
+_access_token: Optional[str] = None
+
+
+def _get_access_token() -> Optional[str]:
+    global _access_token
+    if _access_token:
+        return _access_token
+    if not config.ML_APP_ID or not config.ML_SECRET_KEY:
+        return None
+    try:
+        resp = requests.post(TOKEN_URL, data={
+            "grant_type": "client_credentials",
+            "client_id": config.ML_APP_ID,
+            "client_secret": config.ML_SECRET_KEY,
+        }, timeout=15)
+        resp.raise_for_status()
+        _access_token = resp.json().get("access_token")
+        logger.info("Token Mercado Livre obtido com sucesso")
+        return _access_token
+    except requests.RequestException as e:
+        logger.error("Erro ao obter token ML: %s", e)
+        return None
 
 
 @dataclass
@@ -94,8 +118,13 @@ def _parse_item(item: dict) -> Optional[Offer]:
 
 
 def _fetch_page(params: dict) -> list[dict]:
+    headers = {"Accept": "application/json"}
+    token = _get_access_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
     try:
-        resp = requests.get(SEARCH_URL, params=params, timeout=15)
+        resp = requests.get(SEARCH_URL, params=params, headers=headers, timeout=15)
         resp.raise_for_status()
         return resp.json().get("results", [])
     except requests.RequestException as e:
