@@ -1,6 +1,6 @@
 """
-Envio de mensagens via Evolution API (https://doc.evolution-api.com).
-Para usar outra API de WhatsApp, implemente a interface _send_text.
+Envio de mensagens via Green API (https://green-api.com).
+Plano gratuito: 500 mensagens/mês — sem precisar instalar nada.
 """
 
 import requests
@@ -10,32 +10,27 @@ import config
 logger = logging.getLogger(__name__)
 
 
-def _evolution_headers() -> dict:
-    return {
-        "apikey": config.EVOLUTION_API_KEY,
-        "Content-Type": "application/json",
-    }
-
-
-def _send_text(group_id: str, text: str) -> bool:
-    if not all([config.EVOLUTION_API_URL, config.EVOLUTION_API_KEY, config.EVOLUTION_INSTANCE]):
+def _send_text(chat_id: str, text: str) -> bool:
+    if not all([config.GREEN_API_ID_INSTANCE, config.GREEN_API_TOKEN]):
         logger.error(
-            "Evolution API não configurada. Defina EVOLUTION_API_URL, "
-            "EVOLUTION_API_KEY e EVOLUTION_INSTANCE no .env"
+            "Green API não configurada. Defina GREEN_API_ID_INSTANCE e "
+            "GREEN_API_TOKEN no .env"
         )
         return False
 
-    url = f"{config.EVOLUTION_API_URL.rstrip('/')}/message/sendText/{config.EVOLUTION_INSTANCE}"
+    url = (
+        f"https://api.green-api.com/waInstance{config.GREEN_API_ID_INSTANCE}"
+        f"/sendMessage/{config.GREEN_API_TOKEN}"
+    )
     payload = {
-        "number": group_id,
-        "text": text,
-        "delay": 1000,
+        "chatId": chat_id,
+        "message": text,
     }
 
     try:
-        resp = requests.post(url, json=payload, headers=_evolution_headers(), timeout=20)
+        resp = requests.post(url, json=payload, timeout=20)
         resp.raise_for_status()
-        logger.info("Mensagem enviada para %s", group_id)
+        logger.info("Mensagem enviada para %s", chat_id)
         return True
     except requests.HTTPError as e:
         logger.error("Erro HTTP ao enviar mensagem: %s — %s", e, resp.text)

@@ -19,11 +19,10 @@ MAX_OFFERS_PER_RUN = int(os.getenv("MAX_OFFERS_PER_RUN", "5"))
 # Agendamento (em minutos)
 SCHEDULE_INTERVAL_MINUTES = int(os.getenv("SCHEDULE_INTERVAL_MINUTES", "30"))
 
-# WhatsApp — Evolution API
-EVOLUTION_API_URL = os.getenv("EVOLUTION_API_URL", "")     # ex: http://localhost:8080
-EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "")
-EVOLUTION_INSTANCE = os.getenv("EVOLUTION_INSTANCE", "")    # nome da instância
-WHATSAPP_GROUP_ID = os.getenv("WHATSAPP_GROUP_ID", "")      # ex: 120363xxxxxxx@g.us
+# WhatsApp — Green API
+GREEN_API_ID_INSTANCE = os.getenv("GREEN_API_ID_INSTANCE", "")       # ex: 1101xxxxxxx
+GREEN_API_TOKEN = os.getenv("GREEN_API_TOKEN", "")                    # token da instância
+WHATSAPP_GROUP_ID = os.getenv("WHATSAPP_GROUP_ID", "")                # ex: 120363xxxxxxx@g.us
 
 # Arquivo de controle de duplicatas
 SENT_OFFERS_FILE = os.getenv("SENT_OFFERS_FILE", "sent_offers.json")
